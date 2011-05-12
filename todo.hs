@@ -6,6 +6,8 @@ import System.Environment
  
 -- | 'main' runs the main program
 main :: IO ()
-main = getArgs >>= print . haqify . head
+main = do s <- getArgs
+          putStrLn (haqify (head s))
  
+haqify :: String -> String
 haqify s = "Haq! " ++ s
