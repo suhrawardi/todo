@@ -1,0 +1,13 @@
+Name:                todo
+Version:             0.1
+Description:         For a personal kanban system
+License:             GPL
+License-file:        LICENSE
+Author:              Jarra
+Maintainer:          suhrawardi@gmail.com
+Build-Type:          Simple
+Cabal-Version:       >=1.2
+
+Executable todo
+  Main-is:           todo.hs
+  Build-Depends:     base >= 3 && < 5
