@@ -27,5 +27,6 @@ main = do s <- getArgs
  
 addTask :: Connection -> IO ()
 addTask dbh = do putStrLn "Add a task:"
-                 t <- getLine
-                 putStrLn (t ++ " added to the to do list!")
+                 task <- getLine
+                 i <- addTaskToDB dbh task
+                 putStrLn (show i ++ " tasks added to the to do list!")

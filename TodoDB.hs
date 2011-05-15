@@ -19,6 +19,11 @@ createTable dbh table query = do tables <- getTables dbh
                                  commit dbh
                               where msg = "Creating table '" ++ table ++ "': "
 
+
+addTaskToDB :: Connection -> String -> IO Integer
+addTaskToDB dbh text = run dbh query [toSql text]
+                       where query = "INSERT INTO tasks VALUES (NULL, ?)"
+
                
 prepDB :: Connection -> IO ()
 prepDB dbh = createTable dbh "tasks" q
