@@ -6,23 +6,23 @@ import System.Environment
 import Database.HDBC
 import Database.HDBC.Sqlite3
 
+import TodoDB
+
+
  
 -- | 'main' runs the main program
 main :: IO ()
-main = do s <- getArgs
+main = do dbh <- getDbHandle
+          s <- getArgs
           if s == [] 
             then putStrLn "empty!"
             else case head s of
-                      "add"  -> addTask
+                      "add"  -> addTask dbh
                       "list" -> putStrLn "Oh no!\nNothing there yet."
                       _      -> putStrLn "Plainly wrong"
 
  
-addTask :: IO ()
-addTask = do putStrLn "Add a task:"
-             t <- getLine
-             putStrLn (haqify t)
-
-
-haqify :: String -> String
-haqify s = "Haq! " ++ s
+addTask :: Connection -> IO ()
+addTask dbh = do putStrLn "Add a task:"
+                 t <- getLine
+                 putStrLn (t ++ " added to the to do list!")
