@@ -3,12 +3,11 @@
 -- GPL version 2 or later (see http://www.gnu.org/copyleft/gpl.html)
 --
 import System.Environment
-import Control.Monad(unless)
-import System.Directory
 import Database.HDBC
 import Database.HDBC.Sqlite3
 
 import TodoDB
+import TodoConfig
 
 
  
@@ -24,17 +23,6 @@ main = do s <- getArgs
                       "add"  -> addTask dbh
                       "list" -> putStrLn "Oh no!\nNothing there yet."
                       _      -> putStrLn "Plainly wrong"
-
-
-prepConfig :: String -> String -> IO FilePath
-prepConfig home uuid = do dir <- createDir (home ++ "/.todo")
-                          createDir (dir ++ "/" ++ uuid) 
-
-
-createDir :: FilePath -> IO FilePath
-createDir path = do isDir <- doesDirectoryExist path
-                    unless isDir $ createDirectory path
-                    return path
 
  
 addTask :: Connection -> IO ()
