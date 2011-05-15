@@ -16,7 +16,7 @@ main :: IO ()
 main = do s <- getArgs
           home <- getEnv "HOME"
           dir <- prepConfig home "2d97cca2"
-          dbh <- getDBHandle (getDBFp dir "data")
+          dbh <- getDBHandle (getDBFp dir)
           if s == [] 
             then putStrLn "empty!"
             else case head s of

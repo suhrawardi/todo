@@ -33,5 +33,5 @@ getDBHandle fp = do dbh <- connectSqlite3 fp
                     return dbh
 
                
-getDBFp :: FilePath -> String -> FilePath
-getDBFp dir str = dir ++ "/" ++ str ++ ".db"
+getDBFp :: FilePath -> FilePath
+getDBFp dir = dir ++ "/data.db"
