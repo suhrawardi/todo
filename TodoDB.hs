@@ -6,16 +6,18 @@ module TodoDB where
 
 import Database.HDBC
 import Database.HDBC.Sqlite3
+import Control.Monad(when)
  
 
 
 createTable :: Connection -> String -> String -> IO ()
-createTable dbh table query = do run dbh query []
+createTable dbh table query = do tables <- getTables dbh
+                                 when (not ("tasks" `elem` tables)) $
+                                     do run dbh query []
+                                        putStrLn msg
                                  commit dbh
-                                 putStrLn msg
-                              where tables = getTables dbh
-                                    msg = ("Creating table '" ++ table ++ "'\
-                                           \: ok")
+                              where msg = "Creating table '" ++ table ++ "'\
+                                          \: ok"
 
                
 getDbHandle :: IO Connection
