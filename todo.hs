@@ -15,7 +15,7 @@ import TodoConfig
 main :: IO ()
 main = do s <- getArgs
           home <- getEnv "HOME"
-          dir <- prepConfig home "2d97cca2"
+          dir <- prepConfig home
           dbh <- getDBHandle (getDBFp dir)
           if s == [] 
             then putStrLn "empty!"

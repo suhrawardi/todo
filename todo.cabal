@@ -10,4 +10,4 @@ Cabal-Version:       >=1.2
 
 Executable todo
   Main-is:           todo.hs
-  Build-Depends:     base >= 3 && < 5, HDBC, HDBC-sqlite3, directory
+  Build-Depends:     base >= 3 && < 5, HDBC, HDBC-sqlite3, directory, uuid
