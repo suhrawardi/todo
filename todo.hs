@@ -12,7 +12,7 @@ import TodoDB
  
 -- | 'main' runs the main program
 main :: IO ()
-main = do dbh <- getDbHandle
+main = do dbh <- getDBHandle (getDBFp "ooooooo")
           s <- getArgs
           if s == [] 
             then putStrLn "empty!"

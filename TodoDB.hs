@@ -12,19 +12,26 @@ import Control.Monad(when)
 
 createTable :: Connection -> String -> String -> IO ()
 createTable dbh table query = do tables <- getTables dbh
-                                 when (not ("tasks" `elem` tables)) $
-                                     do run dbh query []
-                                        putStrLn msg
+                                 when ("tasks" `notElem` tables) $
+                                     do putStr msg
+                                        run dbh query []
+                                        putStrLn "ok" 
                                  commit dbh
-                              where msg = "Creating table '" ++ table ++ "'\
-                                          \: ok"
+                              where msg = "Creating table '" ++ table ++ "': "
 
                
-getDbHandle :: IO Connection
-getDbHandle = do dbh <- connectSqlite3 ("." ++ uuid ++ ".db")
-                 createTable dbh "tasks" q
-                 return dbh
-              where q = "CREATE TABLE tasks (\
-                        \ id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\
-                        \ task TEXT NOT NULL)"
-                    uuid = "712df98a-7ed6"
+prepDB :: Connection -> IO ()
+prepDB dbh = createTable dbh "tasks" q
+             where q = "CREATE TABLE tasks (\
+                       \ id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\
+                       \ task TEXT NOT NULL)"
+
+               
+getDBHandle :: FilePath -> IO Connection
+getDBHandle fp = do dbh <- connectSqlite3 fp
+                    prepDB dbh
+                    return dbh
+
+               
+getDBFp :: String -> FilePath
+getDBFp str = "." ++ str ++ ".db"
