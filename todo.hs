@@ -13,16 +13,21 @@ import TodoConfig
  
 -- | 'main' runs the main program
 main :: IO ()
-main = do s <- getArgs
+main = do args <- getArgs
           home <- getEnv "HOME"
           dir <- prepConfig home
           dbh <- getDBHandle (getDBFp dir)
-          if s == [] 
-            then putStrLn "empty!"
-            else case head s of
-                      "add"  -> addTask dbh
-                      "list" -> putStrLn "Oh no!\nNothing there yet."
-                      _      -> putStrLn "Plainly wrong"
+          case args of
+              ("add":_)  -> addTask dbh
+
+              ("list":_) -> putStrLn "Not implemented yet!"
+
+              _          -> putStrLn . unlines $
+                            [ "usage:"
+                            , "\ttodo add"
+                            , "\ttodo list"
+                            ]
+              
 
  
 addTask :: Connection -> IO ()
