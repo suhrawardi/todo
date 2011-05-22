@@ -21,15 +21,36 @@ createTable dbh table query = do tables <- getTables dbh
 
 
 addTaskToDB :: Connection -> String -> IO Integer
-addTaskToDB dbh text = run dbh query [toSql text]
-                       where query = "INSERT INTO tasks VALUES (NULL, ?)"
+addTaskToDB dbh text = do i <- run dbh query [toSql text, toSql "b"]
+                          commit dbh
+                          return i
+                       where query = "INSERT INTO tasks VALUES (NULL, ?, ?)"
+
+
+getTasks :: Connection -> String -> IO ()
+getTasks dbh status = do r <- quickQuery' dbh
+                              " SELECT id, task FROM tasks\
+                              \ WHERE status = ? ORDER BY id"
+                              [toSql status]
+                         let stringRows = map convRow r
+                         mapM_ putStrLn stringRows
+                      where convRow :: [SqlValue] -> String
+                            convRow [sqlId, sqlTask] =
+                                show i ++ "), " ++ t
+                                where i = (fromSql sqlId)::Integer
+                                      t = case fromSql sqlTask of
+                                              Just x  -> x
+                                              Nothing -> "NULL"
+                            convRow x = fail $ "Unexpected result: " ++ show x
 
                
+-- status can be b(acklog), w(ip) or d(one).
 prepDB :: Connection -> IO ()
 prepDB dbh = createTable dbh "tasks" q
              where q = "CREATE TABLE tasks (\
                        \ id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\
-                       \ task TEXT NOT NULL)"
+                       \ task TEXT NOT NULL,\
+                       \ status VARCHAR(1) NULL)"
 
                
 getDBHandle :: FilePath -> IO Connection

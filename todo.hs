@@ -18,20 +18,31 @@ main = do args <- getArgs
           dir <- prepConfig home
           dbh <- getDBHandle (getDBFp dir)
           case args of
-              ("add":_)  -> addTask dbh
+              ("add":task:_)    -> addTask dbh task
 
-              ("list":_) -> putStrLn "Not implemented yet!"
+              ("add":_)         -> do putStrLn "Add a task:"
+                                      task <- getLine
+                                      addTask dbh task
 
-              _          -> putStrLn . unlines $
-                            [ "usage:"
-                            , "\ttodo add"
-                            , "\ttodo list"
-                            ]
-              
+              ("list":status:_) -> listTasks dbh status
+
+              _                 -> putStrLn . unlines $
+                                   [ "usage:"
+                                   , "\ttodo add [task]"
+                                   , "\ttodo list (backlog|wip|done)"
+                                   ]
 
  
-addTask :: Connection -> IO ()
-addTask dbh = do putStrLn "Add a task:"
-                 task <- getLine
-                 i <- addTaskToDB dbh task
-                 putStrLn (show i ++ " tasks added to the to do list!")
+addTask :: Connection -> String -> IO ()
+addTask dbh task = do i <- addTaskToDB dbh task
+                      putStrLn (show i ++ " tasks added to the to do list!")
+
+
+listTasks :: Connection -> String -> IO ()
+listTasks dbh status = do case status of
+                              "backlog" -> do putStrLn "Showing backlog"
+                                              getTasks dbh "b"
+                              "wip"     -> do putStrLn "Showing WIP"
+                                              getTasks dbh "w"
+                              "done"    -> do putStrLn "Showing work done"
+                                              getTasks dbh "d"
