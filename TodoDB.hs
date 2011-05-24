@@ -7,6 +7,7 @@ module TodoDB where
 import Database.HDBC
 import Database.HDBC.Sqlite3
 import Control.Monad(when)
+import Data.Maybe
  
 
 
@@ -37,10 +38,8 @@ getTasks dbh status = do r <- quickQuery' dbh
                       where convRow :: [SqlValue] -> String
                             convRow [sqlId, sqlTask] =
                                 show i ++ "), " ++ t
-                                where i = (fromSql sqlId)::Integer
-                                      t = case fromSql sqlTask of
-                                              Just x  -> x
-                                              Nothing -> "NULL"
+                                where i = fromSql sqlId::Integer
+                                      t = fromMaybe "NULL" (fromSql sqlTask)
                             convRow x = fail $ "Unexpected result: " ++ show x
 
                

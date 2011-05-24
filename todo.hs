@@ -39,10 +39,10 @@ addTask dbh task = do i <- addTaskToDB dbh task
 
 
 listTasks :: Connection -> String -> IO ()
-listTasks dbh status = do case status of
-                              "backlog" -> do putStrLn "Showing backlog"
-                                              getTasks dbh "b"
-                              "wip"     -> do putStrLn "Showing WIP"
-                                              getTasks dbh "w"
-                              "done"    -> do putStrLn "Showing work done"
-                                              getTasks dbh "d"
+listTasks dbh status = case status of
+                           "backlog" -> do putStrLn "Showing backlog"
+                                           getTasks dbh "b"
+                           "wip"     -> do putStrLn "Showing WIP"
+                                           getTasks dbh "w"
+                           "done"    -> do putStrLn "Showing work done"
+                                           getTasks dbh "d"
