@@ -21,12 +21,22 @@ createTable dbh table query = do tables <- getTables dbh
                               where msg = "Creating table '" ++ table ++ "': "
 
 
-updateTaskStatus :: Connection -> String -> String -> IO Integer
-updateTaskStatus dbh id text = do i <- run dbh query [toSql text, toSql id]
-                                  commit dbh
-                                  return i
-                               where query = " UPDATE tasks SET status = ? \
-                                             \ WHERE id = ?"
+startTaskInDB :: Connection -> String -> IO Integer
+startTaskInDB dbh id = do i <- run dbh query [toSql id]
+                          commit dbh
+                          return i
+                       where query = " UPDATE tasks SET status = 'w', \
+                                     \ started_at = DATETIME('now')\
+                                     \ WHERE id = ?"
+
+
+finishTaskInDB :: Connection -> String -> IO Integer
+finishTaskInDB dbh id = do i <- run dbh query [toSql id]
+                           commit dbh
+                           return i
+                        where query = " UPDATE tasks SET status = 'd', \
+                                      \ finished_at = DATETIME('now')\
+                                      \ WHERE id = ?"
 
 
 addTaskToDB :: Connection -> String -> String -> IO Integer

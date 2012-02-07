@@ -30,12 +30,15 @@ main = do args <- getArgs
 
               ("start":id:_)    -> startTask dbh id
 
+              ("finish":id:_)    -> finishTask dbh id
+
               ("list":status:_) -> listTasks dbh status
 
               _                 -> putStrLn . unlines $
                                    [ "usage:"
                                    , "\ttodo add [task] [desc]"
                                    , "\ttodo start [task id]"
+                                   , "\ttodo finish [task id]"
                                    , "\ttodo list (backlog|wip|done)"
                                    ]
 
@@ -46,9 +49,15 @@ addTask dbh task desc = do i <- addTaskToDB dbh task desc
 
 
 startTask :: Connection -> String -> IO ()
-startTask dbh id = do updateTaskStatus dbh id "w"
+startTask dbh id = do startTaskInDB dbh id
                       putStrLn "Started task:"
                       getTask dbh id
+
+
+finishTask :: Connection -> String -> IO ()
+finishTask dbh id = do finishTaskInDB dbh id
+                       putStrLn "Finished task:"
+                       getTask dbh id
 
 
 listTasks :: Connection -> String -> IO ()
