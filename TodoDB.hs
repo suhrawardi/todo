@@ -21,6 +21,14 @@ createTable dbh table query = do tables <- getTables dbh
                               where msg = "Creating table '" ++ table ++ "': "
 
 
+updateTaskStatus :: Connection -> String -> String -> IO Integer
+updateTaskStatus dbh id text = do i <- run dbh query [toSql text, toSql id]
+                                  commit dbh
+                                  return i
+                               where query = " UPDATE tasks SET status = ? \
+                                             \ WHERE id = ?"
+
+
 addTaskToDB :: Connection -> String -> IO Integer
 addTaskToDB dbh text = do i <- run dbh query [toSql text, toSql "b"]
                           commit dbh
@@ -35,18 +43,28 @@ getTasks dbh status = do r <- quickQuery' dbh
                               [toSql status]
                          let stringRows = map convRow r
                          mapM_ putStrLn stringRows
-                      where convRow :: [SqlValue] -> String
-                            convRow [sqlId, sqlTask] =
-                                show i ++ "), " ++ t
-                                where i = fromSql sqlId::Integer
-                                      t = fromMaybe "NULL" (fromSql sqlTask)
-                            convRow x = fail $ "Unexpected result: " ++ show x
+
+
+getTask :: Connection -> String -> IO ()
+getTask dbh id = do r <- quickQuery' dbh
+                         " SELECT id, task FROM tasks\
+                         \ WHERE id = ?"
+                         [toSql id]
+                    let stringRows = map convRow r
+                    mapM_ putStrLn stringRows
+
+
+convRow :: [SqlValue] -> String
+convRow [sqlId, sqlTask] = show i ++ "), " ++ t
+                           where i = fromSql sqlId::Integer
+                                 t = fromMaybe "NULL" (fromSql sqlTask)
+convRow x                = fail $ "Unexpected result: " ++ show x
 
                
 -- status can be b(acklog), w(ip) or d(one).
 prepDB :: Connection -> IO ()
 prepDB dbh = createTable dbh "tasks" q
-             where q = "CREATE TABLE tasks (\
+             where q = "CREATE TABLE tasks ( \
                        \ id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\
                        \ task TEXT NOT NULL,\
                        \ status VARCHAR(1) NULL)"

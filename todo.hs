@@ -15,8 +15,8 @@ import TodoConfig
 main :: IO ()
 main = do args <- getArgs
           home <- getEnv "HOME"
-          dir <- prepConfig home
-          dbh <- getDBHandle (getDBFp dir)
+          dir  <- prepConfig home
+          dbh  <- getDBHandle (getDBFp dir)
           case args of
               ("add":task:_)    -> addTask dbh task
 
@@ -24,11 +24,14 @@ main = do args <- getArgs
                                       task <- getLine
                                       addTask dbh task
 
+              ("start":id:_)    -> startTask dbh id
+
               ("list":status:_) -> listTasks dbh status
 
               _                 -> putStrLn . unlines $
                                    [ "usage:"
                                    , "\ttodo add [task]"
+                                   , "\ttodo start (task id)"
                                    , "\ttodo list (backlog|wip|done)"
                                    ]
 
@@ -36,6 +39,12 @@ main = do args <- getArgs
 addTask :: Connection -> String -> IO ()
 addTask dbh task = do i <- addTaskToDB dbh task
                       putStrLn (show i ++ " tasks added to the to do list!")
+
+ 
+startTask :: Connection -> String -> IO ()
+startTask dbh id = do updateTaskStatus dbh id "w"
+                      putStrLn "Started task:"
+                      getTask dbh id
 
 
 listTasks :: Connection -> String -> IO ()
