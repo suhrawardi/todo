@@ -8,7 +8,7 @@ import Database.HDBC
 import Database.HDBC.Sqlite3
 import Control.Monad(when)
 import Data.Maybe
- 
+
 
 
 createTable :: Connection -> String -> String -> IO ()

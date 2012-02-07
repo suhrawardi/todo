@@ -10,7 +10,7 @@ import TodoDB
 import TodoConfig
 
 
- 
+
 -- | 'main' runs the main program
 main :: IO ()
 main = do args <- getArgs
@@ -39,12 +39,12 @@ main = do args <- getArgs
                                    , "\ttodo list (backlog|wip|done)"
                                    ]
 
- 
+
 addTask :: Connection -> String -> String -> IO ()
 addTask dbh task desc = do i <- addTaskToDB dbh task desc
                            putStrLn (show i ++ " task added to the todo list!")
 
- 
+
 startTask :: Connection -> String -> IO ()
 startTask dbh id = do updateTaskStatus dbh id "w"
                       putStrLn "Started task:"
