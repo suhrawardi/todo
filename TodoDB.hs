@@ -29,11 +29,16 @@ updateTaskStatus dbh id text = do i <- run dbh query [toSql text, toSql id]
                                              \ WHERE id = ?"
 
 
-addTaskToDB :: Connection -> String -> IO Integer
-addTaskToDB dbh text = do i <- run dbh query [toSql text, toSql "b"]
-                          commit dbh
-                          return i
-                       where query = "INSERT INTO tasks VALUES (NULL, ?, ?)"
+addTaskToDB :: Connection -> String -> String -> IO Integer
+addTaskToDB dbh task desc = do i <- run dbh query [ toSql task
+                                                  , toSql desc
+                                                  , toSql "b"
+                                                  ]
+                               commit dbh
+                               return i
+                            where query = " INSERT INTO tasks VALUES\
+                                          \ (NULL, ?, ?, ?, NULL,\
+                                          \  DATETIME('now'), NULL, NULL)"
 
 
 getTasks :: Connection -> String -> IO ()
@@ -41,24 +46,32 @@ getTasks dbh status = do r <- quickQuery' dbh
                               " SELECT id, task FROM tasks\
                               \ WHERE status = ? ORDER BY id"
                               [toSql status]
-                         let stringRows = map convRow r
+                         let stringRows = map convShortRow r
                          mapM_ putStrLn stringRows
 
 
 getTask :: Connection -> String -> IO ()
 getTask dbh id = do r <- quickQuery' dbh
-                         " SELECT id, task FROM tasks\
+                         " SELECT id, task, description FROM tasks\
                          \ WHERE id = ?"
                          [toSql id]
-                    let stringRows = map convRow r
+                    let stringRows = map convFullRow r
                     mapM_ putStrLn stringRows
 
 
-convRow :: [SqlValue] -> String
-convRow [sqlId, sqlTask] = show i ++ "), " ++ t
-                           where i = fromSql sqlId::Integer
-                                 t = fromMaybe "NULL" (fromSql sqlTask)
-convRow x                = fail $ "Unexpected result: " ++ show x
+convFullRow :: [SqlValue] -> String
+convFullRow [sqlId, sqlTask, sqlDesc] = show i ++ ") " ++ t ++ "\n:\t" ++ d
+                                        where i = fromSql sqlId::Integer
+                                              t = fromMaybe "" (fromSql sqlTask)
+                                              d = fromMaybe "" (fromSql sqlDesc)
+convFullRow x                         = fail $ "Unexpected result: " ++ show x
+
+
+convShortRow :: [SqlValue] -> String
+convShortRow [sqlId, sqlTask] = show i ++ ") " ++ t
+                                where i = fromSql sqlId::Integer
+                                      t = fromMaybe "" (fromSql sqlTask)
+convShortRow x                = fail $ "Unexpected result: " ++ show x
 
                
 -- status can be b(acklog), w(ip) or d(one).
@@ -67,7 +80,12 @@ prepDB dbh = createTable dbh "tasks" q
              where q = "CREATE TABLE tasks ( \
                        \ id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\
                        \ task TEXT NOT NULL,\
-                       \ status VARCHAR(1) NULL)"
+                       \ description TEXT NOT NULL,\
+                       \ status VARCHAR(1) NULL,\
+                       \ position INTEGER,\
+                       \ added_at DATETIME,\
+                       \ started_at DATETIME,\
+                       \ finished_at DATETIME )"
 
                
 getDBHandle :: FilePath -> IO Connection

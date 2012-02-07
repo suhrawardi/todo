@@ -18,11 +18,15 @@ main = do args <- getArgs
           dir  <- prepConfig home
           dbh  <- getDBHandle (getDBFp dir)
           case args of
-              ("add":task:_)    -> addTask dbh task
+              ("add":task:desc:_)    -> addTask dbh task desc
+
+              ("add":task:_)    -> addTask dbh task ""
 
               ("add":_)         -> do putStrLn "Add a task:"
                                       task <- getLine
-                                      addTask dbh task
+                                      putStrLn "Description:"
+                                      desc <- getLine
+                                      addTask dbh task desc
 
               ("start":id:_)    -> startTask dbh id
 
@@ -30,15 +34,15 @@ main = do args <- getArgs
 
               _                 -> putStrLn . unlines $
                                    [ "usage:"
-                                   , "\ttodo add [task]"
-                                   , "\ttodo start (task id)"
+                                   , "\ttodo add [task] [desc]"
+                                   , "\ttodo start [task id]"
                                    , "\ttodo list (backlog|wip|done)"
                                    ]
 
  
-addTask :: Connection -> String -> IO ()
-addTask dbh task = do i <- addTaskToDB dbh task
-                      putStrLn (show i ++ " tasks added to the to do list!")
+addTask :: Connection -> String -> String -> IO ()
+addTask dbh task desc = do i <- addTaskToDB dbh task desc
+                           putStrLn (show i ++ " task added to the todo list!")
 
  
 startTask :: Connection -> String -> IO ()
